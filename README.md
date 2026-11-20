@@ -1,103 +1,112 @@
-# Day 12 — AI SDLC: Đảo Đèn Lồng
+# Đảo Đèn Lồng
 
-> **Cá nhân** (1 người / 1 MSSV) · Áp dụng SDLC cùng AI để xây một **game 3D** qua **4 phase**, từ yêu cầu ban đầu tới bản phát hành.
-> **Lab board + trợ giảng:** **[Đảo Đèn Lồng Lab](https://claude.ai/artifact/Q1RYyv1dxjUczzCbd2ZnoW)**
+> Video demo: _(sẽ bổ sung ở Phase 4)_ · Đề lab: [LAB.md](LAB.md) · Bằng chứng: [Phase 1](docs/proof/phase1/README.md) · [Phase 2](docs/proof/phase2/README.md) · [Phase 3](docs/proof/phase3/README.md) · [CHANGELOG](CHANGELOG.md) · [ADR 0001](docs/adr/0001-lantern-fuel-and-dawn-win.md)
 
----
+Game 3D góc nhìn thứ ba qua 3 Đêm. Mây, người giữ đèn nhỏ tuổi đội nón lá, gom đom đóm để thắp lại các Đèn Lồng Lớn trên Đảo Bến, Đảo Cau và Đảo Chuông trước bình minh. Trên đường đi phải né Bóng Mực và Gió Lạc.
 
-## Tài liệu của lab
+## Cài đặt và chạy (macOS / Linux / Windows, Python ≥ 3.10)
 
-| File | Nội dung |
+```bash
+python3 -m pip install -r requirements.txt   # cài Ursina (engine 3D)
+python3 -m game.app                          # chơi: Menu → Đêm 1 → 2 → 3 → Bình Minh
+```
+
+Chế độ headless (Test Contract **v1.2**, không cần cửa sổ, GPU hay Ursina):
+
+```bash
+python3 -m game.headless --seed 1 --night 1|2|3 --ticks 21600 --out out.jsonl [--scenario s.json] [--inputs i.json] [--snapshot-every 10]
+```
+
+- Chạy test: `python3 -m pip install -r requirements-dev.txt && python3 -m pytest -q`
+- Sinh lại bằng chứng: `python3 tools/run_proof.py phase3`
+- Đo FPS: `python3 -m game.app --night 1 --bench 15`
+- Tạo lại âm thanh: `python3 tools/gen_sounds.py`
+
+## Điều khiển
+
+| Phím | Hành động |
 |---|---|
-| [GUIDE.md](GUIDE.md) | Hướng dẫn làm lab: vòng làm việc mỗi phase, harness, kiểm chứng, token |
-| [CHECKPOINTS.md](CHECKPOINTS.md) | Các mốc tự kiểm tra từ chuẩn bị đến nộp bài |
-| [SUBMISSION.md](SUBMISSION.md) | Đặt tên repo, hạn nộp, tag, Release, video, checklist |
-| [RULES.md](RULES.md) | Quy định: AI, trung thực về bằng chứng, bản quyền, bảo mật |
-| [RUBRIC.md](RUBRIC.md) | Thang điểm chi tiết |
+| Phím mũi tên hoặc W A S D | Chạy (camera cố định góc chéo, ↑ là đi lên màn hình) |
+| Space | Nhảy |
+| Shift | Lướt (14 m/s trong 0.2 s, hồi 1.5 s) |
+| E | Nạp đom đóm để thắp đèn, thắp lại đèn đã tắt, hoặc châm dầu cho đèn đang sáng (trong 2 m) |
+| F (hoặc Q) | Tỏa Sáng: tốn 3 đom đóm, làm choáng và đẩy lùi Bóng Mực trong 5 m, đuổi Gió Lạc |
+| Giữ chuột phải và kéo | Xoay góc nhìn (độ nhạy chỉnh trong Cài đặt) |
+| Esc hoặc P | Tạm dừng: Tiếp tục / Chơi lại Đêm / Cài đặt / Về menu |
+| R | Chơi lại Đêm |
+| Enter | Bấm nút chính trên màn hình đang mở |
 
-## Lab board
+## Luật chơi (Ticket-02 + Ticket-03 "Đèn cạn dầu")
 
-Yêu cầu dự án được phát hành tại **[Đảo Đèn Lồng Lab](https://claude.ai/artifact/Q1RYyv1dxjUczzCbd2ZnoW)**. Mỗi phase là một tab (tab chưa phát hành bị khóa), mỗi tab có trợ giảng AI riêng chỉ trả lời trong phạm vi phase đó. Trợ giảng cần đăng nhập claude.ai và dùng lượt Claude của bạn.
+- **Mục tiêu:** giữ đảo sáng tới bình minh. Thắng khi còn sống lúc hết giờ và số đèn đang sáng ≥ 60% (3/5, 4/6, 5/7). Thắp đủ đèn không làm Đêm kết thúc sớm.
+- **Ba Đêm:**
+  - Đêm 1 — Đảo Bến: 5 đèn, 240 s.
+  - Đêm 2 — Đảo Cau: 2 đảo nối bằng cầu tre, có bục nhảy, 6 đèn, 270 s.
+  - Đêm 3 — Đảo Chuông: 3 tầng, có dốc, bục nhảy, gió mạnh mỗi 30 s, 7 đèn, 300 s.
+- **Đèn có dầu:**
+  - Thắp lần đầu cần 10 đom đóm. Đèn vừa thắp có 100 dầu và hao 1 dầu mỗi giây.
+  - Bấm E ở đèn đang sáng để châm dầu: mỗi đom đóm thêm 10 dầu.
+  - Hết dầu thì đèn tắt. Thắp lại đèn đã từng sáng chỉ cần 5 đom đóm.
+  - Đèn còn từ 30 dầu trở lên có vùng an toàn bán kính 6 m.
+- **Bóng Mực:**
+  - Đuổi Mây với tốc độ 4 m/s (Đêm 3 là 4.5 m/s).
+  - Khi đang đi lang thang, chúng tìm tới đèn yếu (dưới 30 dầu) để **hút dầu** (5 dầu/giây mỗi con).
+  - Tỏa Sáng làm chúng choáng.
+- **Đom đóm:** nhặt trong 1 m. Sức chứa bắt đầu là 10, mỗi lần thắp thành công tăng 2, tối đa 20.
+- **Gió Lạc** (Đêm 2, 3): cướp đom đóm. **Bùa Gió:** chạy nhanh hơn, Lướt không cần hồi chiêu. **Rơi khỏi đảo:** mất 1 Ngọn Lửa và toàn bộ đom đóm.
 
-## Dự án
+## Cách tính điểm
 
-**Đảo Đèn Lồng**: game 3D góc nhìn thứ ba. Mây, người giữ đèn nhỏ tuổi, gom đom đóm để thắp lại các Đèn Lồng Lớn và né Bóng Mực trong sương đen.
-
-- Không ràng buộc công nghệ; chạy được trên macOS hoặc Linux.
-- Tuân theo **Test Contract** (chế độ headless) để được chấm tự động và so sánh với nhau.
-
-| Phase | Bạn nhận | Nộp |
-|---|---|---|
-| 1 | **PRD-0** (mô tả tổng quát) + Test Contract | tag `phase-1` |
-| 2 | **Ticket-02**, phát hành khi Phase 1 kết thúc | tag `phase-2` |
-| 3 | **Ticket-03**, phát hành khi Phase 2 kết thúc | tag `phase-3` |
-| 4 | **Ticket-04**, phát hành khi Phase 3 kết thúc | tag `phase-4` + Release `v1.0.0` |
-
-Yêu cầu sẽ được bổ sung và có thể thay đổi giữa các phase, giống dự án thật.
-
-### Lịch 4 giờ
-
-Bài lab kéo dài **4 giờ**. Phase 1 và 2 khoảng **1 giờ**, Phase 3 khoảng **30 phút**, Phase 4 khoảng **1 giờ 30 phút**. Mỗi phase phát hành đúng mốc giờ. Phase mới xuất hiện trên lab board khi tới mốc.
-
-| Mốc | Sự kiện | Hạn tag |
-|---|---|---|
-| 0h | Phát hành **Phase 1** (PRD-0), gồm cả phần chuẩn bị | `phase-1` trước mốc 1h |
-| 1h | Phát hành **Phase 2** | `phase-2` trước mốc 2h |
-| 2h | Phát hành **Phase 3** | `phase-3` trước mốc 2h30 |
-| 2h30 | Phát hành **Phase 4** | `phase-4`, Release `v1.0.0` và video trước mốc 4h |
-| 4h | Hết giờ lab, chốt bài | |
-
-Hết giờ mỗi phase thì tag và chuyển sang phase tiếp theo, dù phase chưa hoàn hảo. Chỗ chưa xong ghi trung thực trong bằng chứng.
-
----
-
-## Gợi ý SDLC (cách làm là của bạn)
-
-Mỗi phase là một vòng nhỏ. Công cụ, thứ tự, định dạng tài liệu đều tự do; đây chỉ là gợi ý:
-
-1. **Requirements:** biến yêu cầu thành tiêu chí nghiệm thu kiểm chứng được. Chỗ mơ hồ thì tự giả định và ghi lại.
-2. **Plan:** nghĩ cách kiểm chứng **trước** khi để agent viết code.
-3. **Build:** để agent viết, bạn điều phối và review.
-4. **Verify:** chạy thật, kiểm tra hành vi thật. *Không có bằng chứng thì chưa xong*: "agent bảo chạy rồi" không phải bằng chứng.
-5. **Evaluate:** cái gì đạt, AI sai ở đâu, harness (AGENTS.md, skill, hook) cần chỉnh gì.
-6. **Release:** gắn tag.
-
-## Ba điều cần nhớ
-
-> Bạn được **tự do sáng tạo thêm** quanh phần lõi (nhân vật, cơ chế nhỏ, câu chuyện, hiệu ứng, âm thanh…). Sáng tạo gọn và không phá yêu cầu được tính điểm trong hạng mục F của [RUBRIC](RUBRIC.md); ghi mục "Sáng tạo của tôi" trong README của bạn.
-
-- **Game tốt là game đúng yêu cầu của khách hàng**, không phải game phức tạp hay đẹp nhất. Làm đúng và chứng minh được là đúng trước, trau chuốt sau.
-- **Cân nhắc kỹ quota token của bạn.** Đốt nhiều token không làm bài tốt hơn. Ngữ cảnh gọn, kế hoạch rõ, kiểm chứng sớm thường vừa rẻ vừa đúng hơn chạy agent liên tục.
-- **Kiểm chứng là phần quan trọng nhất.** Bằng chứng (test, output headless, ảnh, số đo) đáng giá hơn lời mô tả.
-
----
-
-## Bàn giao cuối cùng
-
-Một **repo GitHub cá nhân, public**, gồm:
-
-1. **Toàn bộ mã nguồn** của game qua 4 phase, tag `phase-1` … `phase-4`, Release `v1.0.0`.
-2. **Video demo `.mp4` dưới 5 phút** (đính kèm Release `v1.0.0` hoặc `docs/demo/demo.mp4`, link ở đầu README): chơi thử và cho thấy bằng chứng game chạy đúng.
-3. **Bằng chứng kiểm chứng** của từng phase (định dạng tự chọn).
-4. **Harness AI đã dùng** (AGENTS.md / CLAUDE.md, skills, hooks, plugins…), giữ nguyên trong repo và lịch sử git.
-5. **Ghi chép ngắn:** spec/giả định mỗi phase, nhật ký dùng AI (gồm token/chi phí ước tính), retro.
-
-Không commit API key, token hay `.env`. Gửi link repo theo hướng dẫn của Coach.
-
-## Đánh giá (100 điểm)
-
-| Hạng mục | Điểm |
+| Sự kiện | Điểm |
 |---|---|
-| Test tự động ẩn (headless, gồm kiểm tra lại phase trước) | 30 |
-| Kiểm chứng & bằng chứng của bạn | 20 |
-| Quy trình SDLC & harness AI | 15 |
-| Evaluation & retro (gồm cách bạn dùng token) | 10 |
-| Hiệu năng & ổn định | 10 |
-| Chất lượng sản phẩm (đúng yêu cầu, chơi được) | 10 |
-| Video demo | 5 |
+| Mỗi đom đóm nạp vào đèn (thắp, thắp lại hoặc châm dầu) | +5 |
+| Thắp lần đầu / thắp lại | +100 / +40 |
+| Bóng Mực trúng Tỏa Sáng | +5 (+15 nếu nó đang hút dầu) |
+| Bình minh (khi thắng): mỗi đèn đang sáng | +50 + số dầu còn lại |
+| Bình minh (khi thắng): mỗi Ngọn Lửa còn lại | +50 |
 
-## Quy định
+Tổng điểm game là tổng điểm các Đêm đã thắng.
 
-- Dùng AI thoải mái; không sao chép repo của người khác.
-- Bằng chứng phải thật: test luôn đạt hay output sửa tay là vi phạm.
-- Nhân vật, bối cảnh là bản gốc của lab; asset bên ngoài chỉ dùng loại CC0/CC-BY/MIT hoặc tự tạo, ghi nguồn trong `CREDITS.md`.
+## Test Contract v1.1
+
+- `game.contract.json` ở gốc repo. Không có giá trị `null`. Game đọc tuning trực tiếp từ file này.
+- Thứ tự xử lý một tick theo đúng ticket. Bản đồ chuẩn nằm trong `game/core/maps.py`.
+- Các giả định cho chỗ ticket chưa quy định (ví dụ: `spawning` kéo dài 30 tick, Đêm 3 xuất phát tại (0,0,−30), `invuln` là boolean): xem [phase2-spec.md](docs/notes/phase2-spec.md) mục 2.
+- Một Đêm đầy đủ chạy dưới 1 giây. Thay đổi phá tương thích của v1.2: [CHANGELOG.md](CHANGELOG.md). Quyết định thiết kế: [ADR 0001](docs/adr/0001-lantern-fuel-and-dawn-win.md). Giả định Phase 3: [phase3-spec.md](docs/notes/phase3-spec.md).
+
+## Cấu trúc
+
+```
+game/core/sim.py      toàn bộ luật chơi (Python thuần, tất định)
+game/core/maps.py     3 bản đồ chuẩn: mặt đất, tầng, dốc, cầu, bục nhảy, tháp
+game/headless.py      CLI theo Test Contract
+game/app.py           chuỗi 3 Đêm, đồng bộ hình ảnh/âm thanh (không chứa luật)
+game/view/            shader, phong cảnh, nhân vật, HUD và màn hình, âm thanh/cài đặt
+game/assets/          font Mali (OFL), âm thanh tự tổng hợp
+tests/                pytest (44 test) + tests/scenarios/*.json (mỗi tính năng ≥ 1 scenario)
+tools/                run_proof.py (bằng chứng), gen_sounds.py (âm thanh)
+CLAUDE.md, .claude/   harness AI (hook Stop chạy pytest, skill run-proof)
+docs/notes/           spec, giả định, nhật ký dùng AI
+```
+
+## Sáng tạo của tôi
+
+Toàn bộ phần thêm chỉ nằm ở lớp hiển thị (`game/view/`), không làm đổi đầu ra headless. Màu của các thành phần mà ticket liệt kê theo đúng bảng màu chuẩn; phần còn lại do mình tự thiết kế.
+
+- **Phong cảnh làng quê dưới trăng:** rặng tre, cây đào hồng, hoa nhỏ, đá, đường đá màu cát, hàng rào gỗ, trăng, sao và biển mây.
+  - Đêm 2 có cầu tre trên cọc gỗ.
+  - Đêm 3 có các tầng vách đất, dốc lát cát, và tháp chuông mái ngói có quả chuông vàng.
+- **Ông Đăng:** người làm đèn già, nhân vật mới của mình. Ông nói một câu dặn riêng ở màn giới thiệu mỗi Đêm.
+- **Mây:** dáng chibi, áo kem, khăn đỏ, nón lá treo đèn lồng nhỏ đung đưa. Mây nhún theo bước chạy, nghiêng người khi lướt, nhấp nháy khi bất tử.
+- **Bóng Mực:** hình giọt mực có đuôi ngoe nguẩy và viền phát sáng tím. Khi xuất hiện, nó trồi lên từ mặt đất.
+- **Gió Lạc:** dải lụa xám xanh uốn lượn. **Bùa Gió:** lá bùa xoay tròn, phát sáng.
+- **Gió mạnh:** lá bay ngang màn hình và có tiếng gió báo trước 2 s.
+- **Âm thanh:** tự tổng hợp bằng code (`tools/gen_sounds.py`): nhạc ru đêm theo âm giai ngũ cung, cùng 13 hiệu ứng.
+- **Đèn cạn dầu:** thanh dầu trên đèn, đèn nhấp nháy khi sắp hết dầu; đèn tắt bị xẹp và có vết rách nên nhận ra được mà không cần nhìn màu. Có chế độ "Bảng màu dễ phân biệt" trong Cài đặt. Bóng Mực phập phồng khi đang hút dầu.
+- **Ánh sáng:** shader tự viết. Đèn đã thắp chiếu vầng sáng ấm xuống đúng tầng của nó. Cả đảo sáng dần theo số đèn đã thắp.
+
+Bằng chứng phần lõi vẫn đúng: [pytest.txt](docs/proof/phase3/pytest.txt) (44 passed). `game/core` không import Ursina.
+
+## Giấy phép
+
+[LICENSE](LICENSE) (MIT) · [CREDITS.md](CREDITS.md)

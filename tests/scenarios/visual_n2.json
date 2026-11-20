@@ -1,0 +1,2 @@
+{ "_night": 2, "player": { "pos": [30, 0, 0], "carried": 7 }, "random_shades": false, "random_drifters": false,
+  "shades": [{ "id": "S1", "pos": [22, 1, 6] }], "drifters": [{ "id": "D1", "pos": [26, 1.2, -4] }] }

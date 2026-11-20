@@ -1,0 +1,2 @@
+{ "player": { "flames": 2 }, "random_motes": false, "random_shades": false, "motes": [], "shades": [], "time_left_s": 3,
+  "lanterns": [{ "id": "L1", "lit": true, "fuel": 80 }, { "id": "L2", "lit": true, "fuel": 50 }, { "id": "L3", "lit": true }] }
