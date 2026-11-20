@@ -1,6 +1,6 @@
 # Đảo Đèn Lồng
 
-> Video demo: [docs/demo/demo.mp4](docs/demo/demo.mp4) (hoặc file đính kèm [Release v1.0.0](https://github.com/daothithuphuong-1801/K5-L3A-DAY12-DaoThiThuPhuong-2A202603457-AI-SDLC-Dao-Den-Long/releases/tag/v1.0.0)) · [CHANGELOG](CHANGELOG.md) · [Retro](docs/retro.md) · Bằng chứng: [P1](docs/proof/phase1/README.md) · [P2](docs/proof/phase2/README.md) · [P3](docs/proof/phase3/README.md) · [P4](docs/proof/phase4/README.md) · [ADR 0001](docs/adr/0001-lantern-fuel-and-dawn-win.md) · Đề lab: [LAB.md](LAB.md)
+> **Video demo:** [Demmogame.mp4](https://github.com/daothithuphuong-1801/K5-L3A-DAY12-DaoThiThuPhuong-2A202603457-AI-SDLC-Dao-Den-Long/releases/download/v1.0.0/Demmogame.mp4) (đính kèm [Release v1.0.0](https://github.com/daothithuphuong-1801/K5-L3A-DAY12-DaoThiThuPhuong-2A202603457-AI-SDLC-Dao-Den-Long/releases/tag/v1.0.0)) · [CHANGELOG](CHANGELOG.md) · [Retro](docs/retro.md) · Bằng chứng: [P1](docs/proof/phase1/README.md) · [P2](docs/proof/phase2/README.md) · [P3](docs/proof/phase3/README.md) · [P4](docs/proof/phase4/README.md) · [ADR 0001](docs/adr/0001-lantern-fuel-and-dawn-win.md) · Đề lab: [LAB.md](LAB.md)
 
 Game 3D góc nhìn thứ ba qua 3 Đêm. Bạn điều khiển Mây, cô bé giữ đèn đội nón lá, gom đom đóm để thắp và châm dầu cho các Đèn Lồng Lớn. Mục tiêu là giữ đảo sáng tới bình minh, trong khi Bóng Mực tìm cách hút dầu đèn và Gió Lạc rình cướp đom đóm.
 

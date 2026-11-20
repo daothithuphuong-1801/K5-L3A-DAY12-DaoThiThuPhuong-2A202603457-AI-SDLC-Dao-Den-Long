@@ -7,7 +7,7 @@
 | 1 — PRD-0, v1.0 | Đêm 1 chơi được, headless | Sim tất định, 19 test, scenario, harness (CLAUDE.md, hook Stop, skill, CI) | **Không commit/tag đúng giờ** | — |
 | 2 — Ticket-02, v1.1 | Số chuẩn, 3 Đêm, Lướt, Gió Lạc, Bùa Gió, rơi, tạm dừng, HUD, âm thanh | 35 test, 18 scenario, 53–56 FPS ở cảnh thường | Chuỗi Đêm, âm thanh, câu nhắc chỉ kiểm bằng tay | Có: số liệu Phase 1 bị thay (đã sửa test kèm lý do) |
 | 3 — Ticket-03, v1.2 | Dầu đèn, hút dầu, luật thắng bình minh, chế độ mù màu | 44 test, ADR 0001, CHANGELOG | Hiển thị nhấp nháy / đèn rách chỉ kiểm bằng tay | Có: luật thắng sớm bị thay (test `[T03]`) |
-| 4 — Ticket-04, v1.3 | Bench, soak, bảng xếp hạng, accessibility, phát hành | 58 test, soak đạt, bảng xếp hạng + xuất file, đổi phím, phụ đề, chữ ≥ 18 px | **Bench trên máy mình 43 / 27 FPS < 60 / 30**; Release chưa kiểm chứng; video chưa quay | Không (test `[T04]` chỉ nới cho số phiên bản và khóa cài đặt mới) |
+| 4 — Ticket-04, v1.3 | Bench, soak, bảng xếp hạng, accessibility, phát hành | 58 test, soak đạt, bảng xếp hạng + xuất file, đổi phím, phụ đề, chữ ≥ 18 px | **Bench trên máy mình 43 / 27 FPS < 60 / 30**; Release v1.0.0 đã tạo kèm video demo; build macOS phụ thuộc runner GitHub | Không (test `[T04]` chỉ nới cho số phiên bản và khóa cài đặt mới) |
 
 ## 2. Điều hiệu quả / không hiệu quả khi làm với AI
 - **Hiệu quả:**

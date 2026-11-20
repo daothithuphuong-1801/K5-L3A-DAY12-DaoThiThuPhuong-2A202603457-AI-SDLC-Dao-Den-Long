@@ -25,4 +25,4 @@ Ghi chú trung thực:
   - MSAA 2×, bóng đổ 1024.
 
   Nhưng trên GPU tích hợp, cảnh 200 Bóng Mực vẫn chưa đạt 60 FPS.
-- **Video demo:** chưa có. Tác giả cần tự quay.
+- **Video demo:** [Demmogame.mp4](https://github.com/daothithuphuong-1801/K5-L3A-DAY12-DaoThiThuPhuong-2A202603457-AI-SDLC-Dao-Den-Long/releases/download/v1.0.0/Demmogame.mp4), đính kèm Release v1.0.0.
