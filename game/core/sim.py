@@ -162,10 +162,12 @@ def _idnum(i):
 
 
 class Sim:
-    def __init__(self, seed: int = 0, night: int = 1, scenario: dict | None = None, tuning: dict | None = None):
+    def __init__(self, seed: int = 0, night: int = 1, scenario: dict | None = None, tuning: dict | None = None,
+                 bench: bool = False):
         if night not in (1, 2, 3):
             raise ScenarioError("--night must be 1, 2 or 3")
         self.t = tuning or T.load_tuning()
+        self.bench = bench  # Ticket-04 bench scene: no spawns, damage, pickup, fuel use or end of night
         self.map = make_map(night)
         self.night = night
         self.rng = random.Random(seed * 10 + night)
@@ -328,6 +330,32 @@ class Sim:
         if "time_left_s" in sc:
             self.total_ticks = round(_num(sc["time_left_s"], "time_left_s") * T.TICK_RATE)
 
+    @classmethod
+    def bench_scene(cls, seed=42, shades=200, motes=100):
+        """Ticket-04 benchmark scene: Night 1, Mây idle at (0,0,0), `shades` wander shades and `motes` motes spread
+        uniformly over the island (seeded), L1-L3 lit with fuel 100. Spawning, damage, pickup, fuel use and the end of
+        the night are disabled; shades still follow the normal wander rules."""
+        sim = cls(seed, night=1, scenario={"random_motes": False, "random_shades": False, "random_drifters": False,
+                                           "wind_enabled": False, "motes": [], "shades": [], "drifters": [],
+                                           "lanterns": [{"id": f"L{i}", "lit": True, "fuel": 100} for i in (1, 2, 3)]},
+                  bench=True)
+        rng = random.Random(seed)
+        R = 39.0
+
+        def point():
+            r, a = R * math.sqrt(rng.random()), rng.uniform(0, 2 * math.pi)
+            return r * math.cos(a), r * math.sin(a)
+
+        for i in range(shades):
+            x, z = point()
+            sim.shades.append(Shade(f"S{i + 1}", x, 1.0, z, "wander", 0, hover=1.0))
+        sim.next_shade = shades + 1
+        for _ in range(motes):
+            x, z = point()
+            sim.motes.append(Mote(f"M{sim.next_mote}", x, 0.0, z))
+            sim.next_mote += 1
+        return sim
+
     def _add_mote(self, idx):
         x, y, z = self.map.mote_points[idx]
         self.motes.append(Mote(f"M{self.next_mote}", x, y, z, "random", None, idx))
@@ -446,11 +474,13 @@ class Sim:
         by_id = {l.id: l for l in self.lanterns}
         decay_u = round(t["fuel_decay_per_s"] * T.FUEL_UNIT / T.TICK_RATE)
         drain_u = round(t["drain_per_s"] * T.FUEL_UNIT / T.TICK_RATE)
+        if self.bench:
+            decay_u = drain_u = 0
         for l in self.lanterns:
             if l.lit:
                 l.fuel_u -= decay_u
-        for s in sorted(self.shades, key=lambda s: (s.num, s.id)):
-            if s.state == "drain" and s.target in by_id and by_id[s.target].lit:
+        for s in sorted((s for s in self.shades if s.state == "drain"), key=lambda s: (s.num, s.id)):
+            if s.target in by_id and by_id[s.target].lit:
                 lan = by_id[s.target]
                 lan.fuel_u -= drain_u
                 s.drain_ticks += 1
@@ -469,7 +499,7 @@ class Sim:
         self._move_player(inp, edge)
 
         # 4 pickup motes and charms
-        if p.respawn_wait == 0:
+        if p.respawn_wait == 0 and not self.bench:
             keep = []
             for m in self.motes:
                 if (nt >= m.pick_from and p.carried < self.capacity
@@ -558,7 +588,7 @@ class Sim:
         self._move_drifters()
 
         # 9 contacts: drifters steal first, then shades hit (id order)
-        if p.respawn_wait == 0:
+        if p.respawn_wait == 0 and not self.bench:
             for d in sorted(self.drifters, key=lambda d: (_idnum(d.id), d.id)):
                 if d.state == "chase" and p.carried > 0 and dxz(d.x, d.z, p.x, p.z) <= T.DRIFTER_TOUCH + EPS:
                     amount = min(T.DRIFTER_STEAL, p.carried)
@@ -582,11 +612,14 @@ class Sim:
                         break
 
         # 10 spawns (new entities interact from next tick)
-        self._spawn(nt)
+        if not self.bench:
+            self._spawn(nt)
 
         # 11 win / lose (after every update of the tick): no flames always loses first;
         # at dawn Mây wins if lit lanterns >= ceil(win_ratio * total). No early win any more.
-        if p.flames <= 0:
+        if self.bench:
+            pass
+        elif p.flames <= 0:
             self._end("lost", "no_flames", nt)
         elif nt >= self.total_ticks:
             if sum(l.lit for l in self.lanterns) >= self.need_lit:
@@ -726,6 +759,9 @@ class Sim:
         p, dt = self.player, T.DT
         speed = self.map.shade_speed if self.night == 3 else self.t["shade_speed"]
         player_ok = p.respawn_wait == 0
+        by_id = {l.id: l for l in self.lanterns}           # computed once per tick (bench: 200 shades)
+        weak = [l for l in self.lanterns if l.lit and l.fuel_u < self.low_u]
+        unlit = [l for l in self.lanterns if not l.lit]
         for s in self.shades:
             if s.state == "spawning":
                 continue
@@ -764,7 +800,6 @@ class Sim:
                     s.state, s.timer = "wander", 0
                 continue
             d = dxz(s.x, s.z, p.x, p.z)
-            by_id = {l.id: l for l in self.lanterns}
             if s.state == "drain":
                 lan = by_id.get(s.target)
                 if player_ok and d <= T.DRAIN_BREAK_DIST + EPS:
@@ -782,7 +817,6 @@ class Sim:
                 s.target = None
                 tx, tz, v = p.x, p.z, speed
             else:
-                weak = [l for l in self.lanterns if l.lit and l.fuel_u < self.low_u]
                 if weak:  # wander shades are drawn to the nearest weak lantern
                     lan = min(weak, key=lambda l: (dxz(s.x, s.z, l.x, l.z), _idnum(l.id), l.id))
                     s.target = lan.id
@@ -792,7 +826,6 @@ class Sim:
                     tx, tz, v = lan.x, lan.z, speed
                 else:
                     s.target = None
-                    unlit = [l for l in self.lanterns if not l.lit]
                     near = min(unlit, key=lambda l: (dxz(s.x, s.z, l.x, l.z), _idnum(l.id), l.id)) if unlit else None
                     if near is not None and dxz(s.x, s.z, near.x, near.z) > 4.0:
                         tx, tz = near.x, near.z   # drift back towards the nearest dark lantern

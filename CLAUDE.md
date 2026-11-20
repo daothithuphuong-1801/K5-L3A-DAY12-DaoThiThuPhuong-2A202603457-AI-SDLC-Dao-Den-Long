@@ -1,6 +1,6 @@
 # Đảo Đèn Lồng — agent guide
 
-Python 3.11. Rules in `game/core/` (pure Python: `sim.py`, `maps.py`, `tuning.py`), 3D view in `game/app.py` + `game/view/` (Ursina), CLI `game/headless.py`. Contract **v1.2** (Ticket-03 on top of Ticket-02). Design decisions in `docs/adr/`, breaking changes in `CHANGELOG.md`.
+Python 3.11. Rules in `game/core/` (pure Python: `sim.py`, `maps.py`, `tuning.py`), 3D view in `game/app.py` + `game/view/` (Ursina), CLI `game/headless.py`. Contract **v1.3** (Ticket-04: bench/soak/leaderboard/accessibility on top of v1.2). Design decisions in `docs/adr/`, breaking changes in `CHANGELOG.md`.
 
 ## Commands
 - Test: `python -m pytest -q` (Stop hook blocks finishing while red)
@@ -8,6 +8,8 @@ Python 3.11. Rules in `game/core/` (pure Python: `sim.py`, `maps.py`, `tuning.py
 - Play: `python -m game.app [--night N]` · Screenshot: `--screenshot f.png --frames 60 --ui play|menu|intro|pause|settings|result|dawn`
 - FPS: `python -m game.app --night N --bench 15 --bench-out docs/proof/phaseN/fps.txt`
 - Proof: `python tools/run_proof.py phaseN` (skill `run-proof`) · Sounds: `python tools/gen_sounds.py`
+- Bench: `python -m game.bench --seed 42 --duration 30 --out bench.json` · Soak: `python -m game.soak --seed 7 --nights 10 --out soak.json`
+- Leaderboard export: `python -m game.app --export-leaderboard out.json`
 
 ## Rules
 - `game/core/` MUST NOT import ursina/panda3d. All game rules live in `core/`; `app.py` only renders + maps keys to `InputState`.
@@ -19,4 +21,7 @@ Python 3.11. Rules in `game/core/` (pure Python: `sim.py`, `maps.py`, `tuning.py
 - Visual design must be original; listed components use the Ticket-02 palette hex (`world.py`, `ui.py`).
 - Creative extras must be view-only; headless output must not change.
 - Every new feature: a scenario in `tests/scenarios/` (`"_night": N` for nights 2/3) + a test. Never weaken a test; when a ticket replaces a rule, change the test, tag it `[TNN]` with the reason, add an ADR + CHANGELOG entry.
+- Performance: never set Ursina properties per frame for many entities (use `setPos`/`setH`); bake meshes; keep `Game._quiet()`.
+- Every UI text >= scale 1.0 (18 px at 720p) via `ui.txt()`; settings/keys persist in `~/.dao_den_long/settings.json`.
+- Release: commit + tag at the end of EVERY phase; `v*` tag triggers `.github/workflows/release.yml`.
 - Assumptions go in `docs/notes/phaseN-spec.md`. Do not git commit/tag (the user commits manually).

@@ -1,9 +1,11 @@
 {
-  "contract_version": "1.2",
+  "contract_version": "1.3",
   "team": "2A202603457-dao-thi-thu-phuong",
   "build_cmd": "python3 -m pip install -r requirements.txt",
   "run_cmd": "python3 -m game.app",
   "headless_cmd": "python3 -m game.headless",
+  "bench_cmd": "python3 -m game.bench",
+  "soak_cmd": "python3 -m game.soak",
   "tuning": {
     "player_speed": 6.0,
     "carry_capacity": 10,

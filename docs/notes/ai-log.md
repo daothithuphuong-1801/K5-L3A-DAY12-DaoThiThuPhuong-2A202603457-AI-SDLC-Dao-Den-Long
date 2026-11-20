@@ -56,6 +56,21 @@ Lỗi của AI / sự cố (Phase 3):
 
 Token/chi phí ước tính Phase 3: ~200k token vào / ~45k token ra.
 
+## Phase 4 (Ticket-04, contract v1.3)
+
+| Bước | Lời nhắc / việc | Kết quả |
+|---|---|---|
+| 1 | Dán Ticket-04 → "đọc và làm" | Ưu tiên phần chấm tự động: bench/soak CLI, contract v1.3, bảng xếp hạng + lệnh xuất file, test |
+| 2 | Bench quá chậm (26 FPS) | cProfile + đếm entity → 7.000 entity thừa trong vòng update của Ursina, 8 node mỗi Bóng Mực, setter chậm → tối ưu lên 43 FPS (vẫn < 60 trên GPU tích hợp, ghi trung thực) |
+| 3 | Accessibility + phát hành | Đổi phím có báo trùng, phụ đề, giảm chuyển động, chữ ≥ 18 px / ×1.25; workflow release PyInstaller; README, CHANGELOG 4 phase, retro |
+
+Lỗi của AI / sự cố (Phase 4):
+- Đo hiệu năng bằng `sed` vào chuỗi có `\n` không khớp → tưởng đã tắt MSAA nhưng chưa. Phát hiện khi đọc lại file; sửa bằng công cụ Edit.
+- Đường dẫn `/tmp` trong Git Bash bị đổi khác nhau giữa tham số CLI và chuỗi trong `python -c` → bảng xếp hạng trong ảnh bị trống. Không phải lỗi game; chuyển sang đường dẫn tương đối.
+- Thêm khóa cài đặt làm đỏ test cũ → hook Stop chặn; cập nhật test `[T04]` kèm lý do.
+
+Token/chi phí ước tính Phase 4: ~400k token vào / ~100k token ra. Tổng dự án ước tính ~1.4M vào / ~345k ra (chi tiết trong docs/retro.md).
+
 Bài học → harness: ghi vào `CLAUDE.md` quy tắc "core không import ursina", "tuning chỉ đọc từ contract", "không làm yếu test". Thêm chế độ `--screenshot` để agent tự chụp và tự xem kết quả hiển thị.
 
 Token/chi phí ước tính Phase 1: ~150k token vào / ~35k token ra (≈ 1 phiên Claude Code). Tiết kiệm: đọc 6 file lab một lần bằng 1 lệnh; viết cả module một lượt thay vì sửa vụn; kiểm chứng bằng headless + pytest (rẻ) trước, chỉ mở game 3D để chụp ảnh khi cần.

@@ -4,3 +4,11 @@ __pycache__/
 /out*.jsonl
 .env
 .claude/settings.local.json
+.venv/
+build/
+dist/
+*.spec
+bench.json
+soak.json
+!docs/proof/**/bench.json
+!docs/proof/**/soak.json

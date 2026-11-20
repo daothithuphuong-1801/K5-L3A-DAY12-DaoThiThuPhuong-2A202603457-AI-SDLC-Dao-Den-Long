@@ -8,4 +8,5 @@
 - Texture `radial_gradient`, `vertical_gradient` đi kèm Ursina (MIT).
 - Mọi mô hình 3D (Mây, đèn, Bóng Mực, cây, tre, ao...) do tác giả dựng từ khối cơ bản/procedural trong code; shader viết riêng. Không dùng model/âm thanh bên ngoài.
 - Thiết kế hình ảnh và giao diện là bản tự làm, không sao chép bố cục/màu/chữ của bài khác.
-- Mã nguồn được viết với hỗ trợ của Claude Code (Anthropic), do tác giả điều phối, review và kiểm chứng.
+- Thư viện: psutil (BSD, đo bộ nhớ), PyInstaller (GPL kèm ngoại lệ cho bản dựng, chỉ dùng để đóng gói), pytest (MIT, chỉ dùng cho test).
+- Công cụ AI tạo nội dung: Claude Code (Anthropic, model Claude Opus) đã viết phần lớn mã nguồn, test, tài liệu, thiết kế hình khối procedural và mã tổng hợp âm thanh. Tác giả điều phối, review và kiểm chứng. Không dùng AI tạo ảnh hay âm thanh dạng file.

@@ -8,8 +8,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -r requirements-dev.txt
-      - name: Unit + scenario tests (core has no ursina dependency)
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Unit + scenario + phase-4 tests
         run: python -m pytest -q
       - name: Headless smoke via contract command + determinism
         run: |
@@ -17,3 +17,5 @@ jobs:
           python3 -m game.headless --seed 3 --night 1 --ticks 1200 --out b.jsonl
           cmp a.jsonl b.jsonl
           tail -1 a.jsonl
+      - name: Soak (contract soak_cmd)
+        run: python3 -m game.soak --seed 7 --nights 10 --out soak.json && cat soak.json

@@ -3,16 +3,33 @@ import json
 from pathlib import Path
 
 SETTINGS_PATH = Path.home() / ".dao_den_long" / "settings.json"
-DEFAULTS = {"volume": 0.7, "mouse_sensitivity": 1.0, "colorblind": 0.0}
+DEFAULTS = {"volume": 0.7, "mouse_sensitivity": 1.0, "colorblind": 0.0, "reduce_motion": 0.0, "large_text": 0.0}
+DEFAULT_KEYS = {"up": "up arrow", "down": "down arrow", "left": "left arrow", "right": "right arrow", "jump": "space",
+                "dash": "shift", "interact": "e", "pulse": "f", "pause": "escape"}
+
+
+def key_conflict(keys, action, key):
+    """Return the other action already using `key`, or None."""
+    for a, k in keys.items():
+        if a != action and k == key:
+            return a
+    return None
 SOUND_DIR = Path(__file__).resolve().parents[1] / "assets" / "sounds"
 
 
 def load_settings(path=SETTINGS_PATH):
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
-        return {k: float(data.get(k, v)) for k, v in DEFAULTS.items()}
+        s = {k: float(data.get(k, v)) for k, v in DEFAULTS.items()}
+        keys = dict(DEFAULT_KEYS)
+        if isinstance(data.get("keys"), dict):
+            keys.update({a: str(k) for a, k in data["keys"].items() if a in DEFAULT_KEYS and isinstance(k, str)})
+        if len(set(keys.values())) != len(keys):  # corrupted file with duplicates -> defaults
+            keys = dict(DEFAULT_KEYS)
+        s["keys"] = keys
+        return s
     except (OSError, ValueError, TypeError):
-        return dict(DEFAULTS)
+        return {**DEFAULTS, "keys": dict(DEFAULT_KEYS)}
 
 
 def save_settings(s, path=SETTINGS_PATH):

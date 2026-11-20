@@ -1,0 +1,61 @@
+name: release
+# Push tag v1.0.0 -> tests, then PyInstaller builds for Linux / macOS / Windows + a source bundle,
+# all attached to the GitHub Release (created automatically).
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt -r requirements-dev.txt
+      - run: python -m pytest -q
+  build:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt pyinstaller
+      - name: PyInstaller (folder build)
+        shell: bash
+        run: |
+          SEP=":"; [ "$RUNNER_OS" = "Windows" ] && SEP=";"
+          pyinstaller --noconfirm --name DaoDenLong --collect-all ursina --collect-all panda3d \
+            --collect-all panda3d_gltf --collect-all panda3d_simplepbr \
+            --add-data "game/assets${SEP}game/assets" --add-data "game.contract.json${SEP}." launcher.py
+          cp README.md LICENSE CREDITS.md dist/DaoDenLong/
+      - name: Zip
+        shell: bash
+        run: |
+          cd dist
+          if [ "$RUNNER_OS" = "Windows" ]; then 7z a ../DaoDenLong-v1.0.0-${RUNNER_OS}.zip DaoDenLong; else zip -qr ../DaoDenLong-v1.0.0-${RUNNER_OS}.zip DaoDenLong; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os }}
+          path: DaoDenLong-v1.0.0-*.zip
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source bundle (run.sh / run.bat)
+        run: git archive --format=zip --prefix=DaoDenLong-src/ -o DaoDenLong-v1.0.0-source.zip HEAD
+      - uses: actions/download-artifact@v4
+        with: { merge-multiple: true }
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: "Đảo Đèn Lồng v1.0.0"
+          body_path: docs/release-notes-v1.0.0.md
+          files: |
+            DaoDenLong-v1.0.0-*.zip

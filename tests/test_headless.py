@@ -60,7 +60,7 @@ def press(sim, **kw):
 def test_contract_v12_standard_numbers():
     # [T03] was test_contract_v11_standard_numbers: version 1.2, new night durations, fuel keys, new score table
     c = json.loads((ROOT / "game.contract.json").read_text(encoding="utf-8"))
-    assert c["contract_version"] == "1.2"
+    assert c["contract_version"] in ("1.2", "1.3")  # [T04] v1.3 only adds bench_cmd/soak_cmd, every v1.2 number is unchanged
     t = c["tuning"]
     assert (t["player_speed"], t["carry_capacity"], t["lantern_cost"], t["pickup_radius"], t["interact_radius"]) == (6.0, 10, 10, 1.0, 2.0)
     assert (t["pulse_cost"], t["pulse_radius"], t["pulse_cooldown_s"], t["pulse_stun_s"], t["pulse_push_m"]) == (3, 5.0, 3.0, 2.0, 4.0)
@@ -557,14 +557,15 @@ def test_scenario_files_run(tmp_path):
 def test_settings_roundtrip(tmp_path):
     from game.view import audio
     p = tmp_path / "s.json"
-    assert audio.load_settings(p) == audio.DEFAULTS
+    sub = lambda d: {k: d[k] for k in ("volume", "mouse_sensitivity", "colorblind")}  # [T04] settings also hold keys/accessibility
+    assert sub(audio.load_settings(p)) == sub(audio.DEFAULTS)
     # [T03] settings gained "colorblind" (Ticket-03 §6, must be persisted)
     audio.save_settings({"volume": 0.3, "mouse_sensitivity": 2.0, "colorblind": 1.0}, p)
-    assert audio.load_settings(p) == {"volume": 0.3, "mouse_sensitivity": 2.0, "colorblind": 1.0}
+    assert sub(audio.load_settings(p)) == {"volume": 0.3, "mouse_sensitivity": 2.0, "colorblind": 1.0}
     audio.save_settings({"volume": 0.5, "mouse_sensitivity": 1.0}, p)  # old file without the key -> default off
     assert audio.load_settings(p)["colorblind"] == 0.0
     p.write_text("{broken", encoding="utf-8")
-    assert audio.load_settings(p) == audio.DEFAULTS
+    assert sub(audio.load_settings(p)) == sub(audio.DEFAULTS)
 
 
 def test_safe_zone_boundary_exactly_30():

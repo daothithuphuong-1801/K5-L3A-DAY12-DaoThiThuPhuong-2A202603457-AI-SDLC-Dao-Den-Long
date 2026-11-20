@@ -264,7 +264,7 @@ def build_world(m):
 
 def setup_lighting(island):
     moon = DirectionalLight(shadows=True)
-    moon.shadow_map_resolution = (2048, 2048)
+    moon.shadow_map_resolution = (1024, 1024)
     moon._light.setCameraMask(NO_SHADOW)
     moon.look_at(Vec3(.5, -1, -.35))
     moon.color = C(.95, .98, 1.12)
@@ -349,21 +349,47 @@ def make_lantern(lid, x, y, z, safe_radius):
             "tears": [tear, tear2], "bar": bar, "fill": fill, "hx": hx}
 
 
+_SHADE_MESH = None
+_EYES_MESH = None
+
+
+def _shade_meshes():
+    """Shared meshes: one flat-shaded ink droplet (body + cap + tail) and one mesh for both eyes."""
+    global _SHADE_MESH, _EYES_MESH
+    if _SHADE_MESH is None:
+        tmp = Entity()
+        Entity(parent=tmp, model="icosphere", scale=(1.2, 1.15, 1.2))
+        Entity(parent=tmp, model=Cone(10, .48, .8), y=.4)
+        for i in range(3):
+            Entity(parent=tmp, model="icosphere", position=(0, -.25 - .1 * i, -.55 - .35 * i), scale=.5 - .12 * i)
+        bake(tmp)
+        _SHADE_MESH, tmp.model = tmp.model, None
+        tmp.disable()
+        ey = Entity()
+        for dx in (-.2, .2):
+            Entity(parent=ey, model="icosphere", scale=(.16, .2, .08), position=(dx, .08, .55))
+        ey.combine()
+        _EYES_MESH, ey.model = ey.model, None
+        ey.disable()
+    return _SHADE_MESH, _EYES_MESH
+
+
 def make_shade():
-    """Bóng Mực: ink droplet (#120A1A) with a violet rim glow (#7A3CFF)."""
+    """Bóng Mực: ink droplet (#120A1A) with a violet rim glow (#7A3CFF). 3 nodes per shade (bench: 200 shades)."""
+    body_m, eyes_m = _shade_meshes()
     root = Entity()
-    body = W(parent=root, model="sphere", scale=(1.2, 1.15, 1.2), color=SHADE)
-    cap = W(parent=root, model=Cone(12, .48, .8), y=.4, color=SHADE)
-    rim = glow(parent=root, scale=2.6, col=(RIM[0], RIM[1], RIM[2], .55))
-    root.tail = [W(parent=root, model="sphere", position=(0, -.25 - .1 * i, -.55 - .35 * i), scale=.5 - .12 * i, color=SHADE)
-                 for i in range(3)]
-    root.eyes = [U(parent=root, model="sphere", scale=(.16, .2, .08), position=(dx, .08, .55), color=C(.85, .75, 1)) for dx in (-.2, .2)]
-    root.body, root.cap, root.rim = body, cap, rim
+    body = W(parent=root, model=body_m, color=SHADE)
+    rim = glow(parent=root, scale=2.0, col=(RIM[0], RIM[1], RIM[2], .6))
+    eyes = U(parent=root, model=eyes_m, color=C(.85, .75, 1))
+    eyes.hide(NO_SHADOW)
+    root.body, root.rim, root.eyes = body, rim, eyes
+    root.state = None
     return root
 
 
 def make_mote(dropped=False):
-    e = U(model="sphere", scale=.22, color=MOTE)
+    e = U(model="icosphere", scale=.22, color=MOTE)
+    e.hide(NO_SHADOW)
     glow(parent=e, scale=6.0, col=(HALO[0], HALO[1], HALO[2], .4 if dropped else .55))
     return e
 

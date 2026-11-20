@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "name": "Mây",
+      "score": 1536,
+      "nights_won": 3,
+      "achieved_at": "2026-11-20T16:57:48+07:00",
+      "seed": 7
+    },
+    {
+      "name": "Dang_01",
+      "score": 980,
+      "nights_won": 2,
+      "achieved_at": "2026-11-20T16:57:48+07:00",
+      "seed": 7
+    },
+    {
+      "name": "Phuong",
+      "score": 640,
+      "nights_won": 1,
+      "achieved_at": "2026-11-20T16:57:48+07:00",
+      "seed": 7
+    },
+    {
+      "name": "Lantern",
+      "score": 210,
+      "nights_won": 0,
+      "achieved_at": "2026-11-20T16:57:48+07:00",
+      "seed": 7
+    }
+  ]
+}

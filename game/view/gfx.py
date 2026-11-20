@@ -194,6 +194,8 @@ def additive(e: Entity):
 def glow(parent=None, scale=1.0, col=(1, .8, .45, .8), **kw):
     e = U(parent=parent, model="quad", texture="radial_gradient", billboard=True, scale=scale,
           color=color.rgba(*col), **kw)
+    from panda3d.core import BitMask32
+    e.hide(BitMask32.bit(5))
     return additive(e)
 
 
